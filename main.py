@@ -24,10 +24,7 @@ class Name(Field):
 
 
 class Phone(Field):
-    def __init__(self, value):
-        self.validate(value)
-        super().__init__(value)
-
+    
     @Field.value.setter
     def validate(self, value):
         if len(value) != 10 or not value.isdigit():
@@ -122,7 +119,9 @@ class AddressBook(UserDict):
 
         self.current_page += 1
         return current_contacts
-    
+        
+    def iterator(self):
+        return self.__iter__()
 
 
 class Birthday(Field):
