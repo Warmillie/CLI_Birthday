@@ -1,5 +1,7 @@
 from collections import UserDict
 from datetime import datetime
+import pickle
+from copy import copy, deepcopy
 
 
 class Field:
@@ -84,7 +86,11 @@ class Record:
                 self.phones.remove(phone)
                 return
         raise ValueError("Phone not found")
-        
+
+class Birthday(Field):
+    @Field.value.setter
+    def value(self, value: str):
+        self.__value = datetime.strptime(value, '%Y.%m.%d').date()
 
 
 class AddressBook(UserDict):
@@ -123,11 +129,29 @@ class AddressBook(UserDict):
     def iterator(self):
         return self.__iter__()
 
+    def save_to_file(self, filename):
+        with open(filename, 'wb') as file:
+            data_copy = copy.deepcopy(self.data)
+            pickle.dump((data_copy), file)
 
-class Birthday(Field):
-    @Field.value.setter
-    def value(self, value: str):
-        self.__value = datetime.strptime(value, '%Y.%m.%d').date()
+    def load_from_file(self, filename):
+        if not self.file.exists():
+            return
+        with open(filename, 'rb') as file:
+            self.data = pickle.load(file)
+
+    def search(self, query):
+        results = []
+        for record in self.data.values():
+            if query.lower() in record.name.value.lower():
+                results.append(record)
+            for phone in record.phones:
+                if query in phone.value:
+                    results.append(record)
+        return results
+
+
+
     
       
 address_book = AddressBook()
